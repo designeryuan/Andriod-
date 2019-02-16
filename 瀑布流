@@ -1,3 +1,32 @@
+1.MainActivity.java
+public class MainActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private StaggeredGridAdapter adapter;
+    private List<ItemData> datas;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.recycler_main);
+
+        initData();
+
+        recyclerView= (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setAdapter(adapter=new StaggeredGridAdapter(this,datas));
+    }
+
+    private void initData(){
+        datas=new ArrayList<>();
+        for(int i=0;i<100;i++){
+            ItemData itemData=new ItemData(""+i,(int) (150 + Math.random() * 200));
+            datas.add(itemData);
+        }
+    }
+}
+
+2.创建StaggeredGridAdapter.java
+
 public class StaggeredGridAdapter extends RecyclerView.Adapter<StaggeredGridAdapter.MyViewHolder>{
     private List<ItemData> datas;
     private LayoutInflater inflater;
@@ -37,4 +66,45 @@ public class StaggeredGridAdapter extends RecyclerView.Adapter<StaggeredGridAdap
             textview= (TextView) itemView.findViewById(R.id.textview);
         }
     }
+3.新建类ItemData,把String类型改成对象
+public class ItemData {
+    private String content;//item内容
+    private int height;//item高度
 
+    public ItemData() {
+    }
+
+    public ItemData(String content, int height) {
+        this.content = content;
+        this.height = height;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+4.配置相应xml(activity_main.xml)
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/textview"
+        android:background="@color/colorPrimary"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="122"
+        android:textSize="20sp"/>
+</FrameLayout>
