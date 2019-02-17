@@ -1,0 +1,242 @@
+public class MainActivity extends FragmentActivity {
+    private ViewPager viewpagerLauncher;
+    private LauncherPagerAdapter adapter;
+
+    private ImageView[] tips;
+    private TextView tv;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_luancher);
+
+        if (!isFirst()) {
+            gotoMain();
+        }
+
+        tv = (TextView) findViewById(R.id.tv_start_headlines);
+        tv.setOnClickListener(onClickListener);
+        viewpagerLauncher = (ViewPager) findViewById(R.id.viewpager_launcher);
+        viewpagerLauncher.setOffscreenPageLimit(2);//设置缓存页数
+        viewpagerLauncher.setAdapter(adapter = new LauncherPagerAdapter(this));
+        viewpagerLauncher.setOnPageChangeListener(changeListener);//页面监听
+        ViewGroup group = (ViewGroup) findViewById(R.id.viewGroup);// 初始化底部显示控件
+        tips = new ImageView[4];
+        for (int i = 0; i < tips.length; i++) {
+            ImageView imageView = new ImageView(this);
+            if (i == 0) {
+                imageView.setBackgroundResource(R.mipmap.page_indicator_focused);
+            } else {
+                imageView.setBackgroundResource(R.mipmap.page_indicator_unfocused);
+            }
+            tips[i] = imageView;
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            layoutParams.leftMargin = 10;// 设置点点点view的左边距
+            layoutParams.rightMargin = 10;// 设置点点点view的右边距
+            group.addView(imageView, layoutParams);
+        }
+    }
+
+    private ViewPager.OnPageChangeListener changeListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrollStateChanged(int arg0) {
+        }
+
+        @Override
+        public void onPageScrolled(int arg0, float arg1, int arg2) {
+        }
+
+        @Override
+        public void onPageSelected(int index) {
+            setImageBackground(index);// 改变点点点的切换效果
+
+            //TextView tvStartHeadlines = (TextView) adapter.getViews().get(index).findViewById(R.id.tv_start_headlines);
+            if (index == tips.length - 1) {// 最后一个
+                tv.setVisibility(View.VISIBLE);
+            } else {
+                tv.setVisibility(View.INVISIBLE);
+            }
+        }
+    };
+
+    /**
+     * 改变点点点的切换效果
+     *
+     * @param selectItems
+     */
+    private void setImageBackground(int selectItems) {
+        for (int i = 0; i < tips.length; i++) {
+            if (i == selectItems) {
+                tips[i].setBackgroundResource(R.mipmap.page_indicator_focused);
+            } else {
+                tips[i].setBackgroundResource(R.mipmap.page_indicator_unfocused);
+            }
+        }
+    }
+
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.tv_start_headlines:
+                    gotoMain();//进入首页
+                    break;
+            }
+        }
+    };
+
+    public void gotoMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private boolean isFirst() {
+        SharedPreferences setting = getSharedPreferences("headlines", Context.MODE_PRIVATE);
+        return setting.getBoolean("FIRST", true);
+    }
+
+    public void setFirst(){
+        SharedPreferences setting = getSharedPreferences("headlines",Context.MODE_PRIVATE);
+        setting.edit().putBoolean("FIRST",false).commit();
+    }
+}
+
+1.配置LauncherPagerAdapter.java
+public class LauncherPagerAdapter extends PagerAdapter  {
+
+
+    private List<View> views;
+    //每页显示的图片
+    private int[] images=new int[]{R.mipmap.tutorial_1,R.mipmap.tutorial_2,R.mipmap.tutorial_3,R.mipmap.tutorial_4};
+
+    public LauncherPagerAdapter(Context context){
+        views=new ArrayList<View>();
+        //初始化每页显示的View
+        for(int i=0;i<images.length;i++){
+            View item=LayoutInflater.from(context).inflate(R.layout.activity_luancher_pager_item, null);
+            ImageView imageview=(ImageView) item.findViewById(R.id.imageview);
+            imageview.setImageResource(images[i]);
+            views.add(item);
+        }
+    }
+
+//    public List<View> getViews() {
+//        return views;
+//    }
+
+    @Override
+    public int getCount() {
+        return views == null ? 0 : views.size();
+    }
+
+    @Override
+    public boolean isViewFromObject(View arg0, Object arg1) {
+        return arg0==arg1;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object){
+        ((ViewPager) container).removeView(views.get(position));
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        ((ViewPager) container).addView(views.get(position), 0);
+        return views.get(position);
+    }
+
+//    @Override
+//    public void onClick(View v) {
+//        launcherView.gotoMain();
+//    }
+}
+2.layout内相应的xml文件
+2.1 activity_luancher.xml
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FCF2E4">
+
+    <android.support.v4.view.ViewPager
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/viewpager_launcher">
+
+    </android.support.v4.view.ViewPager>
+    <TextView
+        android:id="@+id/tv_start_headlines"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:background="@drawable/start_headlines_bg"
+        android:textColor="@color/launcher_item_select"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:text="开启我的头条"/>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/viewGroup"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="30dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+    </LinearLayout>
+</RelativeLayout>
+
+2.2 activity_luancher_pager_item.xml
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <ImageView
+        android:id="@+id/imageview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@mipmap/tutorial_1"/>
+
+    <TextView
+        android:id="@+id/tv_start_headlines"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="60dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:background="@drawable/start_headlines_bg"
+        android:textColor="@color/launcher_item_select"
+        android:textSize="16sp"
+        android:visibility="invisible"
+        android:text="开启我的头条"/>
+
+
+</FrameLayout>
+}
+
+3.drawable内相应的xml文件
+3.1 start_headlines_bg.xml
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/white_normal"/>
+    <stroke
+        android:width="1dp"
+        android:color="@color/launcher_item_select"/>
+    <corners android:radius="3dp"/>
+
+</shape>
+4.value内相应的xml文件
+4.1 colors.xml
+增加：<color name="launcher_item_select">#54B0E9</color>
+    <color name="launcher_item_normal">#9B9B9B</color>
+    <color name="white_normal">#ffffffff</color>
+    
