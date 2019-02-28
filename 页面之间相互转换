@@ -65,6 +65,7 @@ import android.os.Bundle;
 import android.view.View;
 
 public class MainActivity extends Activity{
+    private long exitTime=0;//使用系统计时的方法点击两次返回键退出程序
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +87,27 @@ public class MainActivity extends Activity{
 //        });//方案二通过按钮方法前进到另一个页面
 
     }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            exit();
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }//此模块为点击两次返回键退出程序
+
+    public void exit() {
+        if ((System.currentTimeMillis() - exitTime) > 2000) {
+            Toast.makeText(getApplicationContext(), "再按一次退出程序",
+                    Toast.LENGTH_SHORT).show();
+            exitTime = System.currentTimeMillis();
+        } else {
+            finish();
+            System.exit(0);
+        }
+    }//此模块为点击两次返回键退出程序
+    
     @Override
     protected void onStart() {
         super.onStart();
