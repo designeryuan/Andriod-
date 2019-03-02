@@ -1,0 +1,212 @@
+用户注册案例:实现页面之间将信息传递
+MainActivity.java:
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,RadioGroup.OnCheckedChangeListener{
+    private String str_phone="",str_password="";
+    private String sex_str="男生";
+    private String hobby_str="1";
+    private String city_str="";
+
+    private EditText phoned;
+    private EditText passworded;
+    private RadioButton nanx,nvx;
+    private RadioGroup sexgroup;
+    private CheckBox read,write;
+    private Spinner spinner;
+    private Button button;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        phoned=(EditText) findViewById(R.id.phone);
+        passworded=(EditText) findViewById(R.id.password);
+        sexgroup=(RadioGroup)findViewById(R.id.sex);
+        sexgroup.setOnCheckedChangeListener(this);
+        nanx=(RadioButton)findViewById(R.id.nan);
+        nvx=(RadioButton)findViewById(R.id.nv);
+        read=(CheckBox)findViewById(R.id.reads);
+        write=(CheckBox)findViewById(R.id.writes);
+        button=(Button)findViewById(R.id.button);
+        button.setOnClickListener(this);
+
+        spinner=(Spinner)findViewById(R.id.spinner);
+        final String[] city = new String[]{"北京","上海","杭州","..."};
+        ArrayAdapter<String>adapter=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,city);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
+            @Override
+            public void onItemSelected(AdapterView<?>adapterView,View view,int i, long l){
+                city_str=city[i];
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?>adapterView){
+
+            }
+        });
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch(view.getId()){
+            case R.id.button:
+                str_phone=phoned.getText().toString();
+                str_password=passworded.getText().toString();
+                hobby_str="";
+                if (read.isChecked()){
+                    hobby_str+=read.getText().toString();
+                }if (write.isChecked()){
+                    hobby_str+=write.getText().toString();
+                 }
+                Intent intent = new Intent(MainActivity.this,SecondActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putString("phone",str_phone);
+                bundle.putString("password",str_password);
+                bundle.putString("sex",sex_str);
+                bundle.putString("hobby",hobby_str);
+                bundle.putString("city",city_str);
+                intent.putExtra("Message",bundle);
+                startActivity(intent);
+                break;
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup radioGroup, int i) {
+        if (i==R.id.nan){
+            sex_str="男生";
+        }else {
+            sex_str="女生";
+        }
+
+    }
+}
+
+SecondActivity.java
+public class SecondActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_second);
+
+        Intent intent = getIntent();
+        //从intent取出bundle
+        Bundle bundle = intent.getBundleExtra("Message");
+        String phone=bundle.getString("phone");
+        String password=bundle.getString("password");
+        String sex=bundle.getString("sex");
+        String hobby=bundle.getString("hobby");
+        String city=bundle.getString("city");
+        TextView show=(TextView)findViewById(R.id.showinfo);
+        show.setText("手机号为"+phone+"\n"+"密码为"+password+"\n"+"性别为"+sex+"\n"+"爱好是"+hobby+"\n"+"城市是"+city);
+    }
+}
+相应的xml文件
+1.activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="手机号："
+            android:textSize="25dp"
+            android:textColor="@color/launcher_item_select" />
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="请输入手机号"
+            android:textSize="25dp"
+            android:paddingLeft="15dp"
+            android:id="@+id/phone"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="密    码："
+            android:textSize="25dp"
+            android:textColor="@color/launcher_item_select"
+            />
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="请输入密码"
+            android:textSize="25dp"
+            android:paddingLeft="15dp"
+            android:id="@+id/password"/>
+
+    </LinearLayout>
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/sex">
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/nan"
+            android:text="男"/>
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/nv"
+            android:text="女" />
+    </RadioGroup>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="兴趣"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:id="@+id/reads"
+            android:text="读书"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/writes"
+            android:text="写作"/>
+    </LinearLayout>
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner">
+    </Spinner>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="250dp"
+        android:text="注册"
+        android:textColor="@color/launcher_item_select"
+        android:textSize="25dp"
+        android:id="@+id/button"/>
+</LinearLayout>
+
+2.activity_second.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/showinfo"/>
+
+</LinearLayout>
